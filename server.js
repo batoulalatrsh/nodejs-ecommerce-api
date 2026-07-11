@@ -9,7 +9,6 @@ const categoryRoute = require("./routes/category.route");
 // Connect with DB
 dbConnection();
 
-
 // Express app
 const app = express();
 
@@ -24,6 +23,18 @@ if (process.env.MODE_ENV === "development") {
 
 // Mount routes
 app.use("/api/v1/categories", categoryRoute);
+
+app.all("/{*splat}", (req, res, next) => {
+  // Create error and sent it to erorr handler middleware
+  const err = new Error(`Can not find this route: ${req.originalUrl}`);
+  // Send error to erorr handler middleware
+  next(err.message);
+});
+
+// Global erorr handler middleware
+app.use((error, req, res, next) => {
+  res.status(400).json({ error });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
