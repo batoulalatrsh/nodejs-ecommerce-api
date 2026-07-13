@@ -1,12 +1,14 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+
 dotenv.config({ path: "config.env" });
 
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
 const categoryRoute = require("./routes/category.route");
+const subCategoryRoute = require("./routes/subCategory.route");
 
 // Connect with DB
 dbConnection();
@@ -25,6 +27,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Mount routes
 app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/subcategories", subCategoryRoute);
 
 app.all("/{*splat}", (req, res, next) => {
   // Create error and sent it to erorr handler middleware
@@ -46,7 +49,6 @@ process.on("unhandledRejection", (err) => {
   console.error(`Unhandled Rejection Error: ${err.name} | ${err.message}`);
   server.close(() => {
     console.error(`Shutting down...`);
-
     process.exit(1);
   });
 });

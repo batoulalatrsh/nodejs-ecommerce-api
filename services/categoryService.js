@@ -1,16 +1,14 @@
-const Category = require("../model/categoryModel");
-const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
-
+const asyncHandler = require("express-async-handler");
+const Category = require("../model/categoryModel");
 const AppError = require("../utils/apiError");
 
 // @desc   Get list of categories
 // @route  GET /api/v1/categories
 // @access public
 const getCategories = asyncHandler(async (req, res, next) => {
-  const query = req.query;
-  const page = +query.page || 1;
-  const limit = +query.limit || 2;
+  const page = +req.query.page || 1;
+  const limit = +req.query.limit || 2;
   const skip = (page - 1) * limit;
 
   const categories = await Category.find({}, { __v: false })
@@ -34,7 +32,7 @@ const getCategory = asyncHandler(async (req, res, next) => {
 // @route  POST /api/v1/categories
 // @access private
 const createCategory = asyncHandler(async (req, res, next) => {
-  const name = req.body.name;
+  const { name } = req.body;
 
   const category = await Category.create({
     name,
