@@ -13,7 +13,8 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
   const products = await Product.find({}, { __v: false })
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .populate({ path: "category", select: "name -_id" });
   res.status(200).json({ results: products.length, page, data: products });
 });
 
@@ -21,7 +22,10 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 // @route  GET /api/v1/products/:id
 // @access public
 exports.getProduct = asyncHandler(async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.params.id).populate({
+    path: "category",
+    select: "name -_id",
+  });
   if (!product) {
     return next(new AppError(`No Product for this id: ${req.params.id}`, 404));
   }
@@ -44,7 +48,9 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 // @access private
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  req.body.slug = slugify(req.body.title);
+  if (req.body.title) {
+    req.body.slug = slugify(req.body.title);
+  }
 
   const updatedProduct = await Product.findOneAndUpdate({ _id: id }, req.body, {
     new: true,
