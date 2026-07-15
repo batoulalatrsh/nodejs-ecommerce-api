@@ -3,7 +3,14 @@ const asyncHandler = require("express-async-handler");
 const SubCategory = require("../model/subCategoryModel");
 const AppError = require("../utils/apiError");
 
-// GET /api/v1/categories/:categoryId/subcategories
+exports.createFilterObj = (req, res, next) => {
+  let filterObject = {};
+  if (req.params.categoryId) {
+    filterObject = { category: req.params.categoryId };
+  }
+  req.filterObj = filterObject;
+  next();
+};
 
 // @desc   Get list of subCategories
 // @route  GET /api/v1/subcategories
@@ -13,12 +20,7 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
   const limit = +req.query.limit || 10;
   const skip = (page - 1) * limit;
 
-  let filterObject = {};
-  if (req.params.categoryId) {
-    filterObject = { category: req.params.categoryId };
-  }
-
-  const subCategories = await SubCategory.find(filterObject, { __v: false })
+  const subCategories = await SubCategory.find(req.filterObj, { __v: false })
     .skip(skip)
     .limit(limit);
 
@@ -40,6 +42,13 @@ exports.getSubCategory = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ data: subCategory });
 });
+
+// GET /api/v1/categories/:categoryId/subcategories
+exports.setCategoryIdToBody = (req, res, next) => {
+  // @deac Nested routes
+  if (!req.body.category) req.body.category = req.params.categoryId;
+  next();
+};
 
 // @desc   Create subCategory
 // @route  POST /api/v1/subcategories
