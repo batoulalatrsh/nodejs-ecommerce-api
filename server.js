@@ -11,6 +11,7 @@ const dbConnection = require("./config/database");
 const categoryRoute = require("./routes/category.route");
 const subCategoryRoute = require("./routes/subCategory.route");
 const brandRoute = require("./routes/brand.route");
+const productRoute = require("./routes/product.route");
 
 // Connect with DB
 dbConnection();
@@ -31,6 +32,7 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/subcategories", subCategoryRoute);
 app.use("/api/v1/brands", brandRoute);
+app.use("/api/v1/products", productRoute);
 
 app.all("/{*splat}", (req, res, next) => {
   // Create error and sent it to erorr handler middleware

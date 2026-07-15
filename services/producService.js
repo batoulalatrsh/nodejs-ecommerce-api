@@ -1,82 +1,69 @@
 const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
-const Category = require("../model/categoryModel");
+const Product = require("../model/productModel");
 const AppError = require("../utils/apiError");
 
-// @desc   Get list of categories
-// @route  GET /api/v1/categories
+// @desc   Get list of products
+// @route  GET /api/v1/products
 // @access public
-const getCategories = asyncHandler(async (req, res, next) => {
+exports.getProducts = asyncHandler(async (req, res, next) => {
   const page = +req.query.page || 1;
   const limit = +req.query.limit || 2;
   const skip = (page - 1) * limit;
 
-  const categories = await Category.find({}, { __v: false })
+  const products = await Product.find({}, { __v: false })
     .skip(skip)
     .limit(limit);
-  res.status(200).json({ results: categories.length, page, data: categories });
+  res.status(200).json({ results: products.length, page, data: products });
 });
 
-// @desc   Get Specific category by id
-// @route  GET /api/v1/categories/:id
+// @desc   Get Specific product by id
+// @route  GET /api/v1/products/:id
 // @access public
-const getCategory = asyncHandler(async (req, res, next) => {
-  const category = await Category.findById(req.params.id);
-  if (!category) {
-    return next(new AppError(`No Category for this id: ${req.params.id}`, 404));
+exports.getProduct = asyncHandler(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new AppError(`No Product for this id: ${req.params.id}`, 404));
   }
-  res.status(200).json({ data: category });
+  res.status(200).json({ data: product });
 });
 
-// @desc   Create category
-// @route  POST /api/v1/categories
+// @desc   Create roduct
+// @route  POST /api/v1/products
 // @access private
-const createCategory = asyncHandler(async (req, res, next) => {
-  const { name } = req.body;
+exports.createProduct = asyncHandler(async (req, res, next) => {
+  req.body.slug = slugify(req.body.title);
 
-  const category = await Category.create({
-    name,
-    slug: slugify(name),
+  const product = await Product.create(req.body);
+
+  res.status(201).json({ data: product });
+});
+
+// @desc   Update specific product
+// @route  PUT /api/v1/products/:id
+// @access private
+exports.updateProduct = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  req.body.slug = slugify(req.body.title);
+
+  const updatedProduct = await Product.findOneAndUpdate({ _id: id }, req.body, {
+    new: true,
   });
-
-  res.status(201).json({ data: category });
-});
-
-// @desc   Update specific category
-// @route  PUT /api/v1/categories/:id
-// @access private
-const updateCategory = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name } = req.body;
-
-  const updatedCategory = await Category.findOneAndUpdate(
-    { _id: id },
-    { name, slug: slugify(name) },
-    { new: true },
-  );
-  if (!updatedCategory) {
-    return next(new AppError(`No Category for this id: ${req.params.id}`, 404));
+  if (!updatedProduct) {
+    return next(new AppError(`No Product for this id: ${req.params.id}`, 404));
   }
-  res.status(200).json({ data: updatedCategory });
+  res.status(200).json({ data: updatedProduct });
 });
 
-// @desc   Delete specific category
-// @route  DELETE /api/v1/categories/:id
+// @desc   Delete specific product
+// @route  DELETE /api/v1/products/:id
 // @access private
-const deleteCategory = asyncHandler(async (req, res, next) => {
+exports.deleteProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const category = await Category.deleteOne({ _id: id });
+  const product = await Product.deleteOne({ _id: id });
 
-  if (!category) {
-    return next(new AppError(`No Category for this id: ${req.params.id}`, 404));
+  if (!product) {
+    return next(new AppError(`No Product for this id: ${req.params.id}`, 404));
   }
   res.status(204).json();
 });
-
-module.exports = {
-  getCategories,
-  getCategory,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-};
