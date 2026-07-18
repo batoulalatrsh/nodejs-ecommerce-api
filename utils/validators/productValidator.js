@@ -1,5 +1,7 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
+const Category = require("../../model/categoryModel");
+const SubCategory = require("../../model/subCategoryModel");
 
 exports.createProductValidator = [
   check("title")
@@ -54,8 +56,48 @@ exports.createProductValidator = [
     .notEmpty()
     .withMessage("Product must be belong to a category")
     .isMongoId()
-    .withMessage("Invalid ID formate"),
-  check("subcategory").optional().isMongoId().withMessage("Invalid ID formate"),
+    .withMessage("Invalid ID formate")
+    .custom((categoryId) =>
+      Category.findById(categoryId).then((category) => {
+        if (!category)
+          return Promise.reject(
+            new Error(`No category for this id: ${categoryId}`),
+          );
+      }),
+    ),
+  check("subcategories")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid ID formate")
+    .custom((subcategoriesIds) =>
+      SubCategory.find({ _id: { $exists: true, $in: subcategoriesIds } }).then(
+        (result) => {
+          if (result.length < 1 || result.length !== subcategoriesIds.length) {
+            return Promise.reject(
+              new Error(`This SubCategories do not exits: ${subcategoriesIds}`),
+            );
+          }
+        },
+      ),
+    )
+    .custom((subcategoriesIds, { req }) =>
+      SubCategory.find({ category: req.body.category }).then((results) => {
+        const subcategoriesIdsInBD = [];
+        results.forEach((res) => {
+          subcategoriesIdsInBD.push(res._id.toString());
+        });
+        if (
+          !subcategoriesIds.every((subCategoryId) =>
+            subcategoriesIdsInBD.includes(subCategoryId),
+          )
+        ) {
+          return Promise.reject(
+            new Error(`SubCategories not belong to category`),
+          );
+        }
+      }),
+    ),
+
   check("brand").optional().isMongoId().withMessage("Invalid ID formate"),
   check("ratingsAverage")
     .optional()

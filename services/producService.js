@@ -7,11 +7,18 @@ const AppError = require("../utils/apiError");
 // @route  GET /api/v1/products
 // @access public
 exports.getProducts = asyncHandler(async (req, res, next) => {
+  // 1) Filtering
+  const queryStringObj = { ...req.query };
+  const excludedFields = ["page", "limit", "sort", "fields"];
+  excludedFields.forEach((field) => delete queryStringObj[field]);
+
+  // 2) Pagination
   const page = +req.query.page || 1;
-  const limit = +req.query.limit || 2;
+  const limit = +req.query.limit || 10;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find({}, { __v: false })
+  // 3) Buid and execute the query
+  const products = await Product.find(queryStringObj, { __v: false })
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
