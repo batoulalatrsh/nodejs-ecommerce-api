@@ -12,6 +12,13 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const excludedFields = ["page", "limit", "sort", "fields"];
   excludedFields.forEach((field) => delete queryStringObj[field]);
 
+  //{ 'ratingsAverage[gte]': '4', 'price[gte]': '50' }
+  let queryStr = JSON.stringify(queryStringObj);
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+  console.log(queryStringObj);
+  console.log(JSON.parse(queryStr));
+
+  
   // 2) Pagination
   const page = +req.query.page || 1;
   const limit = +req.query.limit || 10;

@@ -19,6 +19,9 @@ dbConnection();
 // Express app
 const app = express();
 
+// extended parser (convert query)
+app.set("query parser", "extended");
+
 // Middleware
 app.use(express.json());
 
