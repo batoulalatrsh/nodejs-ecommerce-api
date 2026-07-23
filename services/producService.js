@@ -17,7 +17,6 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
   console.log(queryStringObj);
   console.log(JSON.parse(queryStr));
-
   
   // 2) Pagination
   const page = +req.query.page || 1;
