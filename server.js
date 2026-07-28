@@ -1,3 +1,5 @@
+const path = require("path");
+
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
@@ -24,6 +26,9 @@ app.set("query parser", "extended");
 
 // Middleware
 app.use(express.json());
+
+// Express enale us to serve static files
+app.use(express.static(path.join(__dirname, "uploads")));
 
 // Activate morgan in development mode
 if (process.env.NODE_ENV === "development") {

@@ -20,7 +20,9 @@
     "mongoose": "^9.7.4",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
-    "slugify": "^1.6.9"
+    "sharp": "^0.35.3",
+    "slugify": "^1.6.9",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
