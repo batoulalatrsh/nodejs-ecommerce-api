@@ -5,6 +5,7 @@ const factory = require("./handlersFactory");
 // @route  GET /api/v1/products
 // @access public
 exports.getProducts = factory.getAll(Product, "products");
+
 // @desc   Get Specific product by id
 // @route  GET /api/v1/products/:id
 // @access public
