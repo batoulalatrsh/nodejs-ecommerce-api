@@ -10,6 +10,7 @@ const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 exports.uploadBrandyImage = uploadSingleImage("image");
 // Image processing
 exports.resizeImage = asyncHandler(async (req, res, next) => {
+  console.log("brand: ", req.body);
   const filename = `brand-${uuidv4()}-${Date.now()}.jpeg`;
   await sharp(req.file.buffer)
     .resize(600, 600)

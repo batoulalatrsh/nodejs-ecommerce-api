@@ -21,6 +21,7 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// This part for return URL to client
 const setImageUrl = (doc) => {
   // Set image URL
   if (doc.image) {

@@ -60,7 +60,7 @@ const productSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 0,
+      default: 1,
       min: [1, "Rating must be above or equal 1.0"],
       max: [5, "Rating must be below or equal 5.0"],
     },
@@ -80,6 +80,30 @@ productSchema.pre(/^find/, function (next) {
     path: "category",
     select: "name",
   });
+});
+
+// This part for return URL to client
+const setImageUrl = (doc) => {
+  // Set image URL
+  if (doc.imageCover) {
+    const imgUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+    doc.imageCover = imgUrl;
+  }
+  if (doc.images) {
+    const imageList = [];
+    doc.images.forEach((img) => {
+      const imgUrl = `${process.env.BASE_URL}/products/${img}`;
+      imageList.push(imgUrl);
+    });
+    doc.images = imageList;
+  }
+};
+productSchema.post("init", (doc) => {
+  setImageUrl(doc);
+});
+
+productSchema.post("save", (doc) => {
+  setImageUrl(doc);
 });
 
 module.exports = mongoose.model("Product", productSchema);
