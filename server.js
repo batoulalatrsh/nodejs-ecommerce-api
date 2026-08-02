@@ -15,6 +15,7 @@ const subCategoryRoute = require("./routes/subCategory.route");
 const brandRoute = require("./routes/brand.route");
 const productRoute = require("./routes/product.route");
 const userRoute = require("./routes/user.route");
+const authRoute = require("./routes/auth.route");
 
 // Connect with DB
 dbConnection();
@@ -43,6 +44,7 @@ app.use("/api/v1/subcategories", subCategoryRoute);
 app.use("/api/v1/brands", brandRoute);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/auth", authRoute);
 
 app.all("/{*splat}", (req, res, next) => {
   // Create error and sent it to erorr handler middleware

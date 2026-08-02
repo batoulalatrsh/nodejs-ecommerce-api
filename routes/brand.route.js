@@ -16,11 +16,18 @@ const {
   uploadBrandyImage,
   resizeImage,
 } = require("../services/brandService");
+const AuthService = require("../services/authService");
 
 router
   .route("/")
   .get(getBrands)
-  .post(uploadBrandyImage, resizeImage, createBrandValidator, createBrand);
+  .post(
+    AuthService.protect,
+    uploadBrandyImage,
+    resizeImage,
+    createBrandValidator,
+    createBrand,
+  );
 
 router
   .route("/:id")
