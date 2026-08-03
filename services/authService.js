@@ -61,7 +61,16 @@ exports.protect = asyncHandler(async (req, res, next) => {
       ),
     );
   }
-  // 2) Verify token (no change happen, expired token)
+  // 2) Verify token (no change happen, expired token), verify method throw error
+  const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  
   // 3) Check if user exist
+  const currentUser = await User.findById(decoded.userId);
+  if (!currentUser) {
+    return next(
+      new AppError("The user that belong to this token does not exist", 401),
+    );
+  }
   // 4) Check if user change his password after token created
+
 });

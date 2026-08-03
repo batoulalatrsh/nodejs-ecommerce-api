@@ -29,7 +29,7 @@ app.set("query parser", "extended");
 // Middleware
 app.use(express.json());
 
-// Express enale us to serve static files
+// Express enable us to serve static files
 app.use(express.static(path.join(__dirname, "uploads")));
 
 // Activate morgan in development mode

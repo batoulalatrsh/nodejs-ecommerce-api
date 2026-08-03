@@ -16,6 +16,7 @@ const {
   uploadCategoryImage,
   resizeImage,
 } = require("../services/categoryService");
+const AuthService = require("../services/authService");
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router
   .route("/:id")
   .get(getCategoryValidator, getCategory)
   .put(
+    AuthService.protect,
     uploadCategoryImage,
     resizeImage,
     updateCategoryValidator,
