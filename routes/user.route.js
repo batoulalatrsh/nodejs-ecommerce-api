@@ -18,17 +18,42 @@ const {
   uploadUseryImage,
   resizeImage,
 } = require("../services/userService");
+const authService = require("../services/authService");
 
 router
   .route("/")
-  .get(getUsers)
-  .post(uploadUseryImage, resizeImage, createUserValidator, createUser);
+  .get(authService.protect, authService.allowedTo("admin", "manager"), getUsers)
+  .post(
+    authService.protect,
+    authService.allowedTo("admin"),
+    uploadUseryImage,
+    resizeImage,
+    createUserValidator,
+    createUser,
+  );
 
 router
   .route("/:id")
-  .get(getUserValidator, getUser)
-  .put(uploadUseryImage, resizeImage, updateUserdValidator, updateUser)
-  .delete(deleteUserValidator, deleteUser);
+  .get(
+    authService.protect,
+    authService.allowedTo("admin"),
+    getUserValidator,
+    getUser,
+  )
+  .put(
+    authService.protect,
+    authService.allowedTo("admin"),
+    uploadUseryImage,
+    resizeImage,
+    updateUserdValidator,
+    updateUser,
+  )
+  .delete(
+    authService.protect,
+    authService.allowedTo("admin"),
+    deleteUserValidator,
+    deleteUser,
+  );
 
 router
   .route("/changePassword/:id")

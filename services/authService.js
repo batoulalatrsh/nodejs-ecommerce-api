@@ -44,6 +44,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: user, token });
 });
 
+// @desc Make sure that user is logged in
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get it
   let token;
@@ -63,7 +64,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   }
   // 2) Verify token (no change happen, expired token), verify method throw error
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-  
+
   // 3) Check if user exist
   const currentUser = await User.findById(decoded.userId);
   if (!currentUser) {
@@ -72,5 +73,45 @@ exports.protect = asyncHandler(async (req, res, next) => {
     );
   }
   // 4) Check if user change his password after token created
+  if (currentUser.passwordChangedAt) {
+    const passwordChangedTimeStamp = parseInt(
+      currentUser.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    if (passwordChangedTimeStamp > decoded.iat) {
+      return next(
+        new AppError(
+          "User recently change his password, please login again",
+          401,
+        ),
+      );
+    }
+  }
+  req.user = currentUser;
+  next();
+});
 
+// @desc Autorization (user permission)
+exports.allowedTo = (...roles) =>
+  asyncHandler(async (req, res, next) => {
+    // 1) access roles
+    // 2) access registered use (req.user.role)
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You are not allowed to access this route", 403),
+      );
+    }
+    next();
+  });
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  // 1) Get user by email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new AppError(`There is no user for this email ${req.body.email}`, 404),
+    );
+  }
+  // 2) If user exist, Generate reset random 6 digits and save in DB
+  // 3) Send the reset code via email
 });
