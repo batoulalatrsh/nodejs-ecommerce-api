@@ -5,19 +5,10 @@ const bcrypt = require("bcrypt");
 const AppError = require("../utils/apiError");
 const User = require("../model/userModel");
 const sendEmail = require("../utils/sendEmail");
-
-function generateToken(payload) {
-  return jwt.sign(
-    {
-      userId: payload,
-    },
-    process.env.JWT_SECRET_KEY,
-    { expiresIn: process.env.JWT_EXPIRES_IN },
-  );
-}
+const generateToken = require("../utils/generateToken");
 
 // @desc   Signup
-// @route  GET /api/v1/signup
+// @route  GET /api/v1/auth/signup
 // @access Public
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1) Create user
@@ -32,7 +23,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
 });
 
 // @desc   Login
-// @route  GET /api/v1/login
+// @route  GET /api/v1/auth/login
 // @access Public
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) Check if user exist and correct password
@@ -107,7 +98,7 @@ exports.allowedTo = (...roles) =>
   });
 
 // @desc   Forgot password
-// @route  post /api/v1/forgotPassword
+// @route  post /api/v1/auth/forgotPassword
 // @access Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user by email
@@ -117,6 +108,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       new AppError(`There is no user for this email ${req.body.email}`, 404),
     );
   }
+
   // 2) If user exist, Generate hash reset random 6 digits and save in DB
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString(); // We convert it to string to hash it(as it is sensitive data)
   const hashedResetCode = crypto
@@ -151,4 +143,61 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ status: "Success", message: "Reset code sent to email." });
+});
+
+// @desc   Verify Reset code
+// @route  post /api/v1/auth/verifyResetCode
+// @access Public
+exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on reset code
+  const hashedResetCode = crypto
+    .createHash("sha256")
+    .update(req.body.code)
+    .digest("hex");
+
+  const user = await User.findOne({
+    passwordResetCode: hashedResetCode,
+    passwordReserExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError("Reset code invalid or expired", 404));
+  }
+
+  // 2) Reset code valid
+  user.passwordResetVerified = true;
+  await user.save();
+
+  res.status(200).json({ status: "Success" });
+});
+
+// @desc   Reset password
+// @route  post /api/v1/auth/resetPassword
+// @access Public
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new AppError(`There is no user for this email ${req.body.email}`, 404),
+    );
+  }
+
+  // 2) Check if reset code verified
+  if (!user.passwordResetVerified) {
+    return next(
+      new AppError(`Reset code is not verified ${req.body.email}`, 400),
+    );
+  }
+
+  user.password = req.body.newPassword;
+  user.passwordResetCode = undefined;
+  user.passwordReserExpires = undefined;
+  user.passwordResetVerified = undefined;
+
+  await user.save();
+
+  // 3) If everything is ok, generate token
+  const token = generateToken(user._id);
+
+  res.status(200).json({ token });
 });

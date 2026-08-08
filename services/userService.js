@@ -7,6 +7,7 @@ const User = require("../model/userModel");
 const factory = require("./handlersFactory");
 const AppError = require("../utils/apiError");
 const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
+const generateToken = require("../utils/generateToken");
 
 // Upload single image
 exports.uploadUseryImage = uploadSingleImage("profileImg");
@@ -81,3 +82,50 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 // @route  DELETE /api/v1/users/:id
 // @access private
 exports.deleteUser = factory.deleteOne(User);
+
+// @desc   Get logged user data
+// @route  GET /api/v1/users/getMe
+// @access private/protected
+exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
+  req.params.id = req.user._id;
+  next();
+});
+
+// @desc   Update logged user password
+// @route  PUT /api/v1/users/updatePassword
+// @access private/protected
+exports.updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
+  // 1) Update user password based user payload (req.user._id)
+  const user = await User.findOneAndUpdate(
+    { _id: req.user._id },
+    {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+    },
+    { new: true },
+  );
+
+  // 2) Generate token
+  const token = await generateToken(user._id);
+  res.status(200).json({ data: user, token });
+});
+
+// @desc   Update logged user (data without password)
+// @route  PUT /api/v1/users/updateMe
+// @access private/protected
+exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    { _id: req.user._id },
+    { name: req.body.name, email: req.body.email, phone: req.body.phone },
+    { new: true },
+  );
+  res.status(200).json({ data: updatedUser });
+});
+
+// @desc   Delete logged user
+// @route  DELETE /api/v1/users/deleteMe
+// @access private/protected
+exports.deleteLoggedUserData = asyncHandler(async (req, res, next) => {
+  await User.findByIdAndUpdate({ _id: req.user._id }, { active: false });
+  res.status(204).json({ status: "Success" });
+});
