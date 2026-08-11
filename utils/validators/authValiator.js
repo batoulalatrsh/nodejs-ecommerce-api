@@ -9,7 +9,7 @@ exports.signupValidator = [
     .notEmpty()
     .withMessage("User required")
     .isLength({ min: 2 })
-    .withMessage("Too short brand name")
+    .withMessage("Too short name")
     .custom((val, { req }) => {
       req.body.slug = slugify(val);
       return true;

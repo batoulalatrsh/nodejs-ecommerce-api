@@ -8,7 +8,7 @@ const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
 
 // @desc   Signup
-// @route  GET /api/v1/auth/signup
+// @route  POST /api/v1/auth/signup
 // @access Public
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1) Create user
@@ -23,7 +23,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
 });
 
 // @desc   Login
-// @route  GET /api/v1/auth/login
+// @route  POST /api/v1/auth/login
 // @access Public
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) Check if user exist and correct password
