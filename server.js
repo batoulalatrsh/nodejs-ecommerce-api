@@ -17,6 +17,8 @@ const productRoute = require("./routes/product.route");
 const userRoute = require("./routes/user.route");
 const authRoute = require("./routes/auth.route");
 const reviewRoute = require("./routes/review.route");
+const wishListRoute = require("./routes/wishList.route");
+const addressRoute = require("./routes/addresses.route");
 
 // Connect with DB
 dbConnection();
@@ -47,6 +49,8 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/reviews", reviewRoute);
+app.use("/api/v1/wishlist", wishListRoute);
+app.use("/api/v1/addresses", addressRoute);
 
 app.all("/{*splat}", (req, res, next) => {
   // Create error and sent it to erorr handler middleware
