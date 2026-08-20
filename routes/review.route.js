@@ -1,6 +1,6 @@
 const express = require("express");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const {
   createReviewValidator,
   updateReviewValidator,
@@ -13,15 +13,18 @@ const {
   createReview,
   updateReview,
   deleteReview,
+  createFilterObj,
+  setProductIdAndUserIdToBody,
 } = require("../services/reviewService");
 const authService = require("../services/authService");
 
 router
   .route("/")
-  .get(getReviews)
+  .get(createFilterObj, getReviews)
   .post(
     authService.protect,
     authService.allowedTo("user"),
+    setProductIdAndUserIdToBody,
     createReviewValidator,
     createReview,
   );

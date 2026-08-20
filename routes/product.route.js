@@ -17,6 +17,9 @@ const {
   resizeProductImages,
 } = require("../services/producService");
 const authService = require("../services/authService");
+const reviewsRoute = require("./review.route");
+
+router.use("/:productId/reviews", reviewsRoute);
 
 router
   .route("/")

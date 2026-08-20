@@ -5,7 +5,7 @@ const ApiFeatures = require("../utils/apiFeatures");
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const document = await Model.deleteOne({ _id: id });
+    const document = await Model.findOneAndDelete(id);
 
     if (!document) {
       return next(
@@ -27,6 +27,8 @@ exports.updateOne = (Model) =>
         new AppError(`No document for this id: ${req.params.id}`, 404),
       );
     }
+    // Trigger "save" event when update document
+    document.save();
     res.status(200).json({ data: document });
   });
 
