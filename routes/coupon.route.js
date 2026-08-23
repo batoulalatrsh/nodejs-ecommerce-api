@@ -18,7 +18,7 @@ const authService = require("../services/authService");
 
 router.use(authService.protect, authService.allowedTo("admin", "manager"));
 
-router.route("/").get(getCoupons).post(createCouponValidator, createCoupon);
+router.route("/").get(getCoupons).post(createCoupon);
 router
   .route("/:id")
   .get(getCouponValidator, getCoupon)
