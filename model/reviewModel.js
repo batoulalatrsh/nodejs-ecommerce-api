@@ -47,7 +47,6 @@ reviewSchema.statics.calcAverageRatingsAndQuantity = async function (
       },
     },
   ]);
-  console.log(result);
   // Stage 3: store values in product schema
   if (result.length > 0) {
     await Product.findByIdAndUpdate(productId, {
