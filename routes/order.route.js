@@ -8,10 +8,18 @@ const {
   filterOrderForLoggedUser,
   updateOrderToDelivered,
   updateOrderToPaid,
+  checkoutSession,
 } = require("../services/orderService");
 const authService = require("../services/authService");
 
 router.use(authService.protect);
+
+router.get(
+  "/checkout-session/:id",
+  authService.allowedTo("user"),
+  checkoutSession,
+);
+
 router
   .route("/")
   .get(
