@@ -3,6 +3,8 @@ const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const cors = require("cors");
+const compression = require("compression");
 
 dotenv.config({ path: "config.env" });
 
@@ -17,6 +19,13 @@ dbConnection();
 
 // Express app
 const app = express();
+
+// Enable other domains to access your application
+app.use(cors());
+app.options("/{*splat}", cors());
+
+// Compression all responses
+app.use(compression());
 
 // extended parser (convert query)
 app.set("query parser", "extended");
