@@ -13,6 +13,7 @@ const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
 // Routes
 const mountRoutes = require("./routes");
+const { webhookCheckout } = require("./services/orderService");
 
 // Connect with DB
 dbConnection();
@@ -26,6 +27,13 @@ app.options("/{*splat}", cors());
 
 // Compression all responses
 app.use(compression());
+
+// Checkout webhook
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout,
+);
 
 // extended parser (convert query)
 app.set("query parser", "extended");
