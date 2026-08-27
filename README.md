@@ -77,23 +77,6 @@ npm run start:dev
 npm run start:prod
 ```
 
-### Environment Variables
-
-Create a `.env` (or `config.env`) file in the root directory with the following:
-
-```env
-NODE_ENV=development
-PORT=8000
-DB_URI=your_mongodb_connection_string
-JWT_SECRET_KEY=your_jwt_secret
-JWT_EXPIRE_TIME=90d
-STRIPE_SECRET_KEY=your_stripe_secret_key
-EMAIL_HOST=your_smtp_host
-EMAIL_PORT=your_smtp_port
-EMAIL_USER=your_email
-EMAIL_PASSWORD=your_email_password
-```
-
 ## 📡 API Endpoints
 
 Base URL: `/api/v1`
