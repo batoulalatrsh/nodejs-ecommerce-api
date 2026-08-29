@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cors = require("cors");
 const compression = require("compression");
+const { rateLimit } = require("express-rate-limit");
+const mongoSanitize = require("@exortek/express-mongo-sanitize");
 
 dotenv.config({ path: "config.env" });
 
@@ -39,7 +41,10 @@ app.post(
 app.set("query parser", "extended");
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
+
+// To apply data santization
+app.use(mongoSanitize());
 
 // Express enable us to serve static files
 app.use(express.static(path.join(__dirname, "uploads")));
@@ -49,6 +54,17 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
+
+// Limit each IP to 100 requests per `window` (here, per 15 minutes).
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  message:
+    "Too many acounts created from yhis IP, pease try again after 15 minute",
+});
+
+// Apply the rate limiting middleware to all requests.
+app.use("/api/v1/auth/resetPassword", limiter);
 
 // Mount routes
 mountRoutes(app);
