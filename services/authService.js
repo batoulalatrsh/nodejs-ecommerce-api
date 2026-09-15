@@ -117,7 +117,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     .update(resetCode)
     .digest("hex");
 
-  // Save hashed password resetcode into DB
+  // Save hashed password reset code into DB
   user.passwordResetCode = hashedResetCode;
   // Add expiration time for password code(10 min)
   user.passwordReserExpires = Date.now() + 10 * 60 * 1000;
